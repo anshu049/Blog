@@ -28,6 +28,6 @@ services:
     ports:
       - "6379:6379"
   frontend:
-    image: anshu049/blogapp-frontend:latest
+    image: anshu049/blog-frontend
     ports:
       - "4100:4100"
