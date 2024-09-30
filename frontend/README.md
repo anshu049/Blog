@@ -1,8 +1,3 @@
-<p align="center">
-<img src="https://github.com/Checkmarx/capital/blob/capital-dev/.github/assets/frontend-full.PNG#center" width="1000" height="1000" />
-</p>
-
-
 ## Getting started
 
 To get the frontend running locally:
