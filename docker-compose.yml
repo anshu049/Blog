@@ -28,6 +28,6 @@ services:
     ports:
       - "6379:6379"
   frontend:
-    image: capitalapp/frontend:latest
+    image: anshu049/blogapp-frontend:latest
     ports:
       - "4100:4100"
