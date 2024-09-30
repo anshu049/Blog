@@ -1,0 +1,103 @@
+name: CI Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  # https://github.com/gitleaks  
+  GitLeaks:
+    name: Run GitLeaks
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Run Gitleaks Scan
+      run: |
+        docker run --rm -v ${{ github.workspace }}:/repo -w /repo zricethezav/gitleaks:latest detect --verbose --source . -f json -r gitleaks.json
+      continue-on-error: true
+
+    - name: Upload Gitleaks Report
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Gitleaks-report
+        path: gitleaks.json
+
+
+        
+  # https://github.com/marketplace/actions/nodejsscan
+  Nodejsscan:
+    name: Run Nodejsscan
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout the code
+      uses: actions/checkout@v3
+
+    - name: Run Nodejsscan Scan
+      id: njsscan
+      uses: ajinabraham/njsscan-action@master
+      with:
+        args: '. --sarif --output nodejsscan.sarif'
+      continue-on-error: true
+
+    - name: Upload SARIF report
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Nodejsscan-report
+        path: nodejsscan.sarif
+  
+        
+
+  # https://semgrep.dev/docs/semgrep-ci/sample-ci-configs#github-actions
+  Semgrep:
+    name: Run Semgrep
+    runs-on: ubuntu-latest
+    container: 
+      image: semgrep/semgrep:latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Run Semgrep Scan
+        run: semgrep scan --config auto --json-output semgrep.json
+        continue-on-error: true
+
+      - name: Upload Semgrep Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: Semgrep-report
+          path: semgrep.json
+
+
+
+  Retirejsscan:
+    name: Run Retirejsscan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+
+      - name: Install Retire.js and Dependencies
+        run: |
+          yarn install
+          npm install -g retire
+
+      - name: Run Retire.js Scan
+        run: |
+          retire --path . --outputformat json --outputpath retirejsscan.json || true
+        continue-on-error: true
+
+      - name: Upload Retire.js Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: Retirejsscan-report
+          path: retirejsscan.json 
